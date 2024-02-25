@@ -33,6 +33,48 @@ void IRAM_ATTR readEncoderISR()
 }
 */
 
+// -------------------------------------------Menu System
+typedef struct menuState{
+    int selectedBoard = 0; // 0 - none, 1 - Master, 2-4 Rest
+} menuState;
+
+// -------------------------------------------Push Button
+#define PUSHBUTTON_1_PIN 0
+#define PUSHBUTTON_2_PIN 2
+#define PUSHBUTTON_3_PIN 10
+#define PUSHBUTTON_4_PIN 15 //see issue#2
+
+int pushButtonPinArr[] = {PUSHBUTTON_1_PIN, PUSHBUTTON_2_PIN, PUSHBUTTON_3_PIN, PUSHBUTTON_4_PIN};
+
+void setupPushbuttons(){
+    for(int i = 0; i < 4; i++){
+        pinMode(pushButtonPinArr[i], INPUT);
+    }
+}
+
+void handleButtonEvent(menuState *menuState){
+    static bool buttonStateLastStep[] = {1,1,1,1}; //0 means pressed!
+
+    Serial.print(digitalRead(PUSHBUTTON_1_PIN));
+    Serial.print(digitalRead(PUSHBUTTON_2_PIN));
+    Serial.print(digitalRead(PUSHBUTTON_3_PIN));
+    Serial.println(digitalRead(PUSHBUTTON_4_PIN));
+
+    //check GPIOs
+    for(int i = 0; i < 4; i++){
+        if( (digitalRead(pushButtonPinArr[i]) == 0) && !(buttonStateLastStep[i] == 0) ){
+            buttonStateLastStep[i] = digitalRead(pushButtonPinArr[i]);
+            (*menuState).selectedBoard = i +1;
+            Serial.print("button ");
+            Serial.print((*menuState).selectedBoard);
+            Serial.println("pressed");
+            break;  //ignore potential additional clicks
+        }
+        buttonStateLastStep[i] = digitalRead(pushButtonPinArr[i]);
+    }
+}
+
+
 // -------------------------------------------RTC
 RTC_PCF8563 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -81,8 +123,10 @@ void setup() {
     Serial.flush();
 
     // this resets all the neopixels to an off state
-    strip.Begin();
-    strip.Show();
+    // strip.Begin();
+    // strip.Show();
+
+    setupPushbuttons();
 
     /*
     if (! rtc.begin()) {
@@ -242,7 +286,9 @@ void loop() {
         Serial.println("button pressed");
     }
 */
-
+    static menuState menuState;
+    handleButtonEvent(menuState);
+/*
     if (animations.IsAnimating())
     {
         // the normal loop just needs these two to run the active animations
@@ -267,6 +313,8 @@ void loop() {
             Serial.println("Setup Next Set Dark...");
             }
     }
+*/
+
 /*
     buttonState = digitalRead(buttonPin);
     if (buttonState == HIGH) {
