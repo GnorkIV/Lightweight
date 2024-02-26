@@ -5,7 +5,7 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "RTClib.h"
-#include "AiEsp32RotaryEncoder.h"
+#include "Buttons.h"
 
 // -------------------------------------------Buttons
 //const int buttonPin = 12;  // the number of the pushbutton pin
@@ -32,47 +32,6 @@ void IRAM_ATTR readEncoderISR()
     rotaryEncoder.readEncoder_ISR();
 }
 */
-
-// -------------------------------------------Menu System
-typedef struct menuState{
-    int selectedBoard = 0; // 0 - none, 1 - Master, 2-4 Rest
-} menuState;
-
-// -------------------------------------------Push Button
-#define PUSHBUTTON_1_PIN 0
-#define PUSHBUTTON_2_PIN 2
-#define PUSHBUTTON_3_PIN 10
-#define PUSHBUTTON_4_PIN 15 //see issue#2
-
-int pushButtonPinArr[] = {PUSHBUTTON_1_PIN, PUSHBUTTON_2_PIN, PUSHBUTTON_3_PIN, PUSHBUTTON_4_PIN};
-
-void setupPushbuttons(){
-    for(int i = 0; i < 4; i++){
-        pinMode(pushButtonPinArr[i], INPUT);
-    }
-}
-
-void handleButtonEvent(menuState *menuState){
-    static bool buttonStateLastStep[] = {1,1,1,1}; //0 means pressed!
-
-    Serial.print(digitalRead(PUSHBUTTON_1_PIN));
-    Serial.print(digitalRead(PUSHBUTTON_2_PIN));
-    Serial.print(digitalRead(PUSHBUTTON_3_PIN));
-    Serial.println(digitalRead(PUSHBUTTON_4_PIN));
-
-    //check GPIOs
-    for(int i = 0; i < 4; i++){
-        if( (digitalRead(pushButtonPinArr[i]) == 0) && !(buttonStateLastStep[i] == 0) ){
-            buttonStateLastStep[i] = digitalRead(pushButtonPinArr[i]);
-            (*menuState).selectedBoard = i +1;
-            Serial.print("button ");
-            Serial.print((*menuState).selectedBoard);
-            Serial.println("pressed");
-            break;  //ignore potential additional clicks
-        }
-        buttonStateLastStep[i] = digitalRead(pushButtonPinArr[i]);
-    }
-}
 
 
 // -------------------------------------------RTC
