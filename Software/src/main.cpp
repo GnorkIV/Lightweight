@@ -6,6 +6,7 @@
 #include <NeoPixelAnimator.h>
 #include "RTClib.h"
 #include "Rotary_Encoder.h"
+#include "Buttons.h"
 
 // -------------------------------------------Buttons
 //const int buttonPin = 12;  // the number of the pushbutton pin
@@ -13,9 +14,9 @@
 
 const int debugLedPin = 2;    // the number of the LED pin
 
-// // -------------------------------------------RTC
-// RTC_PCF8563 rtc;
-// char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+// -------------------------------------------RTC
+RTC_PCF8563 rtc;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
  
 // -------------------------------------------Server Stuff
 //const char* ssid = "FRITZ!Box 7530 MX";
@@ -63,6 +64,8 @@ void setup() {
     // this resets all the neopixels to an off state
     // strip.Begin();
     // strip.Show();
+
+    setupPushbuttons();
 
     /*
     if (! rtc.begin()) {
@@ -261,19 +264,10 @@ void loop() {
 
         prev_counter = counter;
     }
-
+    
+    static menuState menuState;
+    handleButtonEvent(menuState);
     handleRotaryEncoderButtonEvent();
 
-    /*
-    buttonState = digitalRead(buttonPin);
-    if (buttonState == HIGH) {
-        // turn LED on:
-        digitalWrite(ledPin, HIGH);
-        Serial.println("Upsi!");
-    } else {
-        // turn LED off:
-        digitalWrite(ledPin, LOW);
-    }
-    */
     //delay(5000);
 }
