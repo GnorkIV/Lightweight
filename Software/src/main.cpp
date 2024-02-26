@@ -5,48 +5,13 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "RTClib.h"
+#include "Rotary_Encoder.h"
 
 // -------------------------------------------Buttons
 //const int buttonPin = 12;  // the number of the pushbutton pin
 
 
 const int debugLedPin = 2;    // the number of the LED pin
-
-// variables will change:
-//int buttonState = 0;  // variable for reading the pushbutton status
-
-// -------------------------------------------Rotary Encoder
-
-#define ROTARY_ENCODER_A_PIN 12
-#define ROTARY_ENCODER_B_PIN 13
-#define ROTARY_ENCODER_BUTTON_PIN 14
-
-#define DIRECTION_CW 0   // clockwise direction
-#define DIRECTION_CCW 1  // counter-clockwise direction
-
-volatile int counter = 0;
-volatile int rotary_direction = DIRECTION_CW;
-volatile unsigned long last_time;  // for debouncing
-int prev_counter;
-
-void IRAM_ATTR INTERRUPT_handler() {
-  if ((millis() - last_time) < 10)  // debounce time is 50ms
-    return;
-
-  if (digitalRead(ROTARY_ENCODER_B_PIN) == HIGH) {
-    // The encoder is rotating in counter-clockwise direction => decrease the counter
-    counter--;
-    rotary_direction = DIRECTION_CCW;
-  } else {
-    // The encoder is rotating in clockwise direction => increase the counter
-    counter++;
-    rotary_direction = DIRECTION_CW;
-  }
-
-  last_time = millis();
-}
-
-// RotaryEncoder encoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, RotaryEncoder::LatchMode::TWO03);
 
 // // -------------------------------------------RTC
 // RTC_PCF8563 rtc;
@@ -159,10 +124,7 @@ void setup() {
     rotaryEncoder.setAcceleration(250);
     */
 
-    // Configure encoder pins as inputs
-    pinMode(ROTARY_ENCODER_A_PIN, INPUT);
-    pinMode(ROTARY_ENCODER_B_PIN, INPUT);
-    pinMode(ROTARY_ENCODER_BUTTON_PIN, INPUT);
+    setupRotaryEncoder();
     attachInterrupt(digitalPinToInterrupt(ROTARY_ENCODER_A_PIN), INTERRUPT_handler, RISING);
 
     Serial.println();
@@ -170,8 +132,7 @@ void setup() {
 }
 
 //Animation to define turning off behavior
-void TurnOffSetupAnimationSet()
-{
+void TurnOffSetupAnimationSet(){
     for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
     {
         //uint16_t time = random(100, 400);
@@ -199,8 +160,7 @@ void TurnOffSetupAnimationSet()
 }
 
 //Animation to define turning on behavior
-void TurnOnSetupAnimationSet()
-{
+void TurnOnSetupAnimationSet(){
     // setup some animations
     for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
     {
@@ -302,9 +262,7 @@ void loop() {
         prev_counter = counter;
     }
 
-    if (!(digitalRead(ROTARY_ENCODER_BUTTON_PIN))) {
-        Serial.println("The button is pressed");
-    }
+    handleRotaryEncoderButtonEvent();
 
     /*
     buttonState = digitalRead(buttonPin);
