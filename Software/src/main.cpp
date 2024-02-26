@@ -5,7 +5,6 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "RTClib.h"
-#include "AiEsp32RotaryEncoder.h"
 
 // -------------------------------------------Buttons
 //const int buttonPin = 12;  // the number of the pushbutton pin
@@ -18,24 +17,40 @@ const int debugLedPin = 2;    // the number of the LED pin
 
 // -------------------------------------------Rotary Encoder
 
-/*
-#define ROTARY_ENCODER_A_PIN 32
-#define ROTARY_ENCODER_B_PIN 21
-#define ROTARY_ENCODER_BUTTON_PIN 25
+#define ROTARY_ENCODER_A_PIN 12
+#define ROTARY_ENCODER_B_PIN 13
+#define ROTARY_ENCODER_BUTTON_PIN 14
 
+#define DIRECTION_CW 0   // clockwise direction
+#define DIRECTION_CCW 1  // counter-clockwise direction
 
+volatile int counter = 0;
+volatile int rotary_direction = DIRECTION_CW;
+volatile unsigned long last_time;  // for debouncing
+int prev_counter;
 
-AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, -1, ROTARY_ENCODER_STEPS);
+void IRAM_ATTR INTERRUPT_handler() {
+  if ((millis() - last_time) < 10)  // debounce time is 50ms
+    return;
 
-void IRAM_ATTR readEncoderISR()
-{
-    rotaryEncoder.readEncoder_ISR();
+  if (digitalRead(ROTARY_ENCODER_B_PIN) == HIGH) {
+    // The encoder is rotating in counter-clockwise direction => decrease the counter
+    counter--;
+    rotary_direction = DIRECTION_CCW;
+  } else {
+    // The encoder is rotating in clockwise direction => increase the counter
+    counter++;
+    rotary_direction = DIRECTION_CW;
+  }
+
+  last_time = millis();
 }
-*/
 
-// -------------------------------------------RTC
-RTC_PCF8563 rtc;
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+// RotaryEncoder encoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, RotaryEncoder::LatchMode::TWO03);
+
+// // -------------------------------------------RTC
+// RTC_PCF8563 rtc;
+// char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
  
 // -------------------------------------------Server Stuff
 //const char* ssid = "FRITZ!Box 7530 MX";
@@ -81,8 +96,8 @@ void setup() {
     Serial.flush();
 
     // this resets all the neopixels to an off state
-    strip.Begin();
-    strip.Show();
+    // strip.Begin();
+    // strip.Show();
 
     /*
     if (! rtc.begin()) {
@@ -143,6 +158,12 @@ void setup() {
     rotaryEncoder.setBoundaries(0, 1000, false); //minValue, maxValue, circleValues true|false (when max go to min and vice versa)
     rotaryEncoder.setAcceleration(250);
     */
+
+    // Configure encoder pins as inputs
+    pinMode(ROTARY_ENCODER_A_PIN, INPUT);
+    pinMode(ROTARY_ENCODER_B_PIN, INPUT);
+    pinMode(ROTARY_ENCODER_BUTTON_PIN, INPUT);
+    attachInterrupt(digitalPinToInterrupt(ROTARY_ENCODER_A_PIN), INTERRUPT_handler, RISING);
 
     Serial.println();
     Serial.println("Running...");
@@ -243,31 +264,49 @@ void loop() {
     }
 */
 
-    if (animations.IsAnimating())
-    {
-        // the normal loop just needs these two to run the active animations
-        animations.UpdateAnimations();
-        strip.Show();
-    }
+    // if (animations.IsAnimating())
+    // {
+    //     // the normal loop just needs these two to run the active animations
+    //     animations.UpdateAnimations();
+    //     strip.Show();
+    // }
+    // else
+    // {
+    //     Serial.println();
+    //     Serial.println("Setup Next Set...");
+    //     // example function that sets up some animations
+    //     if (direction == SUNRISE) {
+    //         TurnOnSetupAnimationSet(); 
+    //         direction = SUNSET; //
+    //         //digitalWrite(ledPin, LOW);
+    //         Serial.println("Setup Next Set Bright...");
+    //         }
+    //     else if (direction == SUNSET) {
+    //         TurnOffSetupAnimationSet();  
+    //         direction = SUNRISE;
+    //         //digitalWrite(ledPin, HIGH);
+    //         Serial.println("Setup Next Set Dark...");
+    //         }
+    // }
+
+    if (prev_counter != counter) {
+        Serial.print("Rotary Encoder:: direction: ");
+    if (rotary_direction == DIRECTION_CW)
+        Serial.print("CLOCKWISE");
     else
-    {
-        Serial.println();
-        Serial.println("Setup Next Set...");
-        // example function that sets up some animations
-        if (direction == SUNRISE) {
-            TurnOnSetupAnimationSet(); 
-            direction = SUNSET; //
-            //digitalWrite(ledPin, LOW);
-            Serial.println("Setup Next Set Bright...");
-            }
-        else if (direction == SUNSET) {
-            TurnOffSetupAnimationSet();  
-            direction = SUNRISE;
-            //digitalWrite(ledPin, HIGH);
-            Serial.println("Setup Next Set Dark...");
-            }
+        Serial.print("ANTICLOCKWISE");
+
+        Serial.print(" - count: ");
+        Serial.println(counter);
+
+        prev_counter = counter;
     }
-/*
+
+    if (!(digitalRead(ROTARY_ENCODER_BUTTON_PIN))) {
+        Serial.println("The button is pressed");
+    }
+
+    /*
     buttonState = digitalRead(buttonPin);
     if (buttonState == HIGH) {
         // turn LED on:
