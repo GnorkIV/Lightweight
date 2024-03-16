@@ -1,0 +1,2 @@
+void setupRTC();
+DateTime getDateTime();

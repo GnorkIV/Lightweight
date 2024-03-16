@@ -1,18 +1,7 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-// -------------------------------------------Rotary Encoder
+#include "Rotary_Encoder.h"
 
-#define ROTARY_ENCODER_A_PIN 12
-#define ROTARY_ENCODER_B_PIN 13
-#define ROTARY_ENCODER_BUTTON_PIN 14
-
-#define DIRECTION_CW 0   // clockwise direction
-#define DIRECTION_CCW 1  // counter-clockwise direction
-
-volatile int counter = 0;
-volatile int rotary_direction = DIRECTION_CW;
-volatile unsigned long last_time;  // for debouncing
-int prev_counter;
+RotaryState_s RotaryEncoder = {0,0,0,0};
 
 void setupRotaryEncoder(){
     pinMode(ROTARY_ENCODER_A_PIN, INPUT);
@@ -20,21 +9,34 @@ void setupRotaryEncoder(){
     pinMode(ROTARY_ENCODER_BUTTON_PIN, INPUT);
 }
 
-void IRAM_ATTR INTERRUPT_handler() {
-  if ((millis() - last_time) < 10)  // debounce time is 50ms
+void IRAM_ATTR RotaryEncoderINTERRUPT_handler() {
+  if ((millis() - (RotaryEncoder).last_time) < 10)  // debounce time is 50ms
     return;
 
   if (digitalRead(ROTARY_ENCODER_B_PIN) == HIGH) {
     // The encoder is rotating in counter-clockwise direction => decrease the counter
-    counter--;
-    rotary_direction = DIRECTION_CCW;
+    (RotaryEncoder).counter--;
+    (RotaryEncoder).rotary_direction = DIRECTION_CW;
   } else {
     // The encoder is rotating in clockwise direction => increase the counter
-    counter++;
-    rotary_direction = DIRECTION_CW;
+    (RotaryEncoder).counter++;
+    (RotaryEncoder).rotary_direction = DIRECTION_CCW;
   }
 
-  last_time = millis();
+  (RotaryEncoder).last_time = millis();
+
+    if (RotaryEncoder.prev_counter != RotaryEncoder.counter) {
+        Serial.print("Rotary Encoder:: direction: ");
+    if (RotaryEncoder.rotary_direction == DIRECTION_CW)
+        Serial.print("CLOCKWISE");
+    else
+        Serial.print("ANTICLOCKWISE");
+
+        Serial.print(" - count: ");
+        Serial.println(RotaryEncoder.counter);
+
+        RotaryEncoder.prev_counter = RotaryEncoder.counter;
+    }
 }
 
 void handleRotaryEncoderButtonEvent(){
