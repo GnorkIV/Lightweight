@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "LED.h"
 // -------------------------------------------Rotary Encoder
 
 #define ROTARY_ENCODER_A_PIN 12
@@ -19,4 +20,4 @@ void setupRotaryEncoder();
 
 void IRAM_ATTR RotaryEncoderINTERRUPT_handler();
 
-void handleRotaryEncoderButtonEvent();
+void handleRotaryEncoderButtonEvent(ledStrip_s &Strip);

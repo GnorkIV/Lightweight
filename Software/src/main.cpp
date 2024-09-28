@@ -7,6 +7,9 @@
 #include "Buttons.h"
 #include "server.h"
 #include "RTC.h"
+#include "LED.h"
+
+#define NumberOfStrips 4
 
 enum directionType {
     SUNSET,
@@ -14,8 +17,21 @@ enum directionType {
 };
 directionType direction = SUNRISE;
 
+static menuState_s menuState;
+static ledStrip_s selecteStrip;
 
-//NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
+ledStrip_s Strip[NumberOfStrips];
+
+
+// Struct in LED.h
+// struct ledStrip_s{
+//    boolean status;     // 0 - off, 1 - on
+//    int state;          // 0 - light, 1 - color
+//    int brightness;     // 0-255
+//    RgbwColor color;    // RgbwColor(0, 0, 0, 0) BGRW
+//};
+
+// NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
 // For Esp8266, the Pin is omitted and it uses GPIO3 due to DMA hardware use.  
 // There are other Esp8266 alternative methods that provide more pin options, but also have
 // other side effects.
@@ -37,20 +53,24 @@ void setup() {
     Serial.println();
     Serial.println("Initializing...");
     Serial.flush();
-
-    // this resets all the neopixels to an off state
-    // strip.Begin();
-    // strip.Show();
     
     setupPushbuttons();
     setupRotaryEncoder();
     setupRTC();
-    setupServer();
+    // setupServer();
+    // setupLED();
 
     attachInterrupt(digitalPinToInterrupt(ROTARY_ENCODER_A_PIN), RotaryEncoderINTERRUPT_handler, RISING);
 
+    Serial.println("Setup LED Strips");
+    for (int i=0; i<NumberOfStrips; i++){
+        Strip[i] = {0, 0, 128, RgbwColor(63/2, 255/2, 0, 255/2)};
+    }
+
     Serial.println();
     Serial.println("Running...");
+
+    selecteStrip.state = 1;
 }
 
 void loop() {
@@ -81,11 +101,38 @@ void loop() {
     //         }
     // }
     
-    static menuState_s menuState;
-    handleButtonEvent(menuState);
-    handleRotaryEncoderButtonEvent();
 
+    handleButtonEvent(menuState, selecteStrip);
+    // selecteStrip = Strip[menuState.selectedBoard-1];
+    // selecteStrip = Strip[0];
+    // handleRotaryEncoderButtonEvent(&selecteStrip);
+
+    //selecteStrip.status = 1;
+    // Serial.println(selecteStrip.state);
+
+/*
+    if (menuState.justSelected){
+        menuState.justSelected = false;
+        selecteStrip.status = !(selecteStrip.status);
+        // save selected strip back
+        Strip[menuState.selectedBoard-1] = selecteStrip;
+        // Serial.println(menuState.selectedBoard);
+        if (Strip[0].status && (menuState.selectedBoard == 1)){
+            TurnOn(Strip[0]);
+            // Serial.println("Turn On");
+        }else{
+            TurnOff();
+            // Serial.println("Turn Off");
+        }
+    }
+*/
+
+    // Serial.print(menuState.selectedBoard);
+    Serial.println( selecteStrip.state );
     // Serial.println( getDateTime().second() );
+
+    // // Update Local Strip
+
 
     //delay(5000);
 }

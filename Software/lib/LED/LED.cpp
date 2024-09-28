@@ -2,9 +2,16 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "LED.h"
+#include "Buttons.h"
 
 NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
 NeoPixelAnimator animations(PixelCount, NEO_CENTISECONDS);
+
+void setupLED(){
+    // this resets all the neopixels to an off state
+    strip.Begin();
+    strip.Show();
+}
 
 //Animation to define turning off behavior
 void TurnOffSetupAnimationSet(){
@@ -65,4 +72,17 @@ void TurnOnSetupAnimationSet(){
         // which will continue to run and call the update function until it completes
         animations.StartAnimation(pixel, time, animUpdate);
     }
+}
+
+void TurnOn(ledStrip_s &Strip){
+    for (uint16_t pixel = 0; pixel < PixelCount; pixel++){
+        strip.SetPixelColor(pixel, (Strip).color);
+    }
+    strip.Show();
+}
+void TurnOff(){
+    for (uint16_t pixel = 0; pixel < PixelCount; pixel++){
+        strip.SetPixelColor(pixel, RgbwColor(0, 0, 0, 0));
+    }
+    strip.Show();
 }

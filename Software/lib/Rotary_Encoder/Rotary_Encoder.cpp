@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include "Rotary_Encoder.h"
+#include "LED.h"
 
 RotaryState_s RotaryEncoder = {0,0,0,0};
+// ledStrip_s selecteStrip = {0};
 
 void setupRotaryEncoder(){
     pinMode(ROTARY_ENCODER_A_PIN, INPUT);
@@ -39,7 +41,7 @@ void IRAM_ATTR RotaryEncoderINTERRUPT_handler() {
     }
 }
 
-void handleRotaryEncoderButtonEvent(){
+void handleRotaryEncoderButtonEvent(ledStrip_s *Strip){
     static bool buttonStateLastStep = 1; //0 means pressed!
 
     // Serial.println(digitalRead(ROTARY_ENCODER_BUTTON_PIN));
@@ -47,7 +49,10 @@ void handleRotaryEncoderButtonEvent(){
 
     if( (digitalRead(ROTARY_ENCODER_BUTTON_PIN) == 0) && !(buttonStateLastStep == 0) ){
         buttonStateLastStep = digitalRead(ROTARY_ENCODER_BUTTON_PIN);
+        Strip->state = Strip->state +1;
         Serial.println("RotaryEncoder pressed");
+        Serial.print("New Modi ");
+        Serial.println(Strip->state);
     }
     buttonStateLastStep = digitalRead(ROTARY_ENCODER_BUTTON_PIN);
 }
