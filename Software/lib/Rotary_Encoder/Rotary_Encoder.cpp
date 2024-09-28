@@ -41,7 +41,7 @@ void IRAM_ATTR RotaryEncoderINTERRUPT_handler() {
     }
 }
 
-void handleRotaryEncoderButtonEvent(ledStrip_s *Strip){
+void handleRotaryEncoderButtonEvent(ledStrip_s &Strip){
     static bool buttonStateLastStep = 1; //0 means pressed!
 
     // Serial.println(digitalRead(ROTARY_ENCODER_BUTTON_PIN));
@@ -49,10 +49,10 @@ void handleRotaryEncoderButtonEvent(ledStrip_s *Strip){
 
     if( (digitalRead(ROTARY_ENCODER_BUTTON_PIN) == 0) && !(buttonStateLastStep == 0) ){
         buttonStateLastStep = digitalRead(ROTARY_ENCODER_BUTTON_PIN);
-        Strip->state = Strip->state +1;
+        Strip.state = Strip.state +1;
         Serial.println("RotaryEncoder pressed");
         Serial.print("New Modi ");
-        Serial.println(Strip->state);
+        Serial.println(Strip.state);
     }
     buttonStateLastStep = digitalRead(ROTARY_ENCODER_BUTTON_PIN);
 }

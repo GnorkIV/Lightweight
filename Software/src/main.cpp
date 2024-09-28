@@ -63,14 +63,16 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(ROTARY_ENCODER_A_PIN), RotaryEncoderINTERRUPT_handler, RISING);
 
     Serial.println("Setup LED Strips");
-    for (int i=0; i<NumberOfStrips; i++){
-        Strip[i] = {0, 0, 128, RgbwColor(63/2, 255/2, 0, 255/2)};
-    }
+
+    selecteStrip = {0, 0, 128, RgbwColor(63/2, 255/2, 0, 255/2)};
+
+    // for (int i=0; i<NumberOfStrips; i++){
+    //     Strip[i] = {0, 0, 128, RgbwColor(63/2, 255/2, 0, 255/2)};
+    // }
 
     Serial.println();
     Serial.println("Running...");
 
-    selecteStrip.state = 1;
 }
 
 void loop() {
@@ -105,7 +107,7 @@ void loop() {
     handleButtonEvent(menuState, selecteStrip);
     // selecteStrip = Strip[menuState.selectedBoard-1];
     // selecteStrip = Strip[0];
-    // handleRotaryEncoderButtonEvent(&selecteStrip);
+    handleRotaryEncoderButtonEvent(selecteStrip);
 
     //selecteStrip.status = 1;
     // Serial.println(selecteStrip.state);
@@ -128,11 +130,12 @@ void loop() {
 */
 
     // Serial.print(menuState.selectedBoard);
-    Serial.println( selecteStrip.state );
+    Serial.println( selecteStrip.status );
+    Serial.println( selecteStrip.brightness );
     // Serial.println( getDateTime().second() );
 
     // // Update Local Strip
-
+    UpdateLED(selecteStrip);
 
     //delay(5000);
 }

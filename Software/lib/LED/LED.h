@@ -24,5 +24,6 @@ void TurnOffSetupAnimationSet();
 void TurnOn(ledStrip_s &Strip);
 void TurnOff();
 void setColor(ledStrip_s &Strip);
+void UpdateLED(ledStrip_s &Strip);
 
 #endif

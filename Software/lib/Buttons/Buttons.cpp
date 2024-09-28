@@ -29,17 +29,19 @@ void handleButtonEvent(menuState_s &menuState, ledStrip_s &selecteStrip){
             menuState.selectedBoard = i +1;
             menuState.justSelected = true;
 
-            if (selecteStrip.state == 1){
-                selecteStrip.state = 0;
+            if (selecteStrip.status == 1){
+                selecteStrip.status = 0;
+                TurnOff();
             }else{
-                selecteStrip.state = 1;
+                selecteStrip.status = 1;
+                TurnOn(selecteStrip);
             }
             
             Serial.print("button ");
             Serial.print(menuState.selectedBoard);
             Serial.println(" pressed");
 
-            Serial.println(selecteStrip.state);
+            Serial.println(selecteStrip.status);
 
             break;  //ignore potential additional clicks
         }

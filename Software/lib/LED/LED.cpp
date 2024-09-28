@@ -76,13 +76,20 @@ void TurnOnSetupAnimationSet(){
 
 void TurnOn(ledStrip_s &Strip){
     for (uint16_t pixel = 0; pixel < PixelCount; pixel++){
-        strip.SetPixelColor(pixel, (Strip).color);
+        strip.SetPixelColor(pixel, Strip.color);
     }
     strip.Show();
 }
 void TurnOff(){
-    for (uint16_t pixel = 0; pixel < PixelCount; pixel++){
-        strip.SetPixelColor(pixel, RgbwColor(0, 0, 0, 0));
-    }
+    strip.Begin();
     strip.Show();
+}
+
+void UpdateLED(ledStrip_s &Strip){
+    if(Strip.status == 1){
+        // TurnOn(Strip);
+        Serial.println( "Einschalten" );
+    }else{
+        Serial.println( "Ausschalten" );
+    }
 }
